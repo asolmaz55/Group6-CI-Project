@@ -1,14 +1,10 @@
 services:
-  backend:
-    build:
-      context: ./backend
-    ports:
-      - "9000:9000"
-
   frontend:
+    image: ghcr.io/asolmaz55/group6-frontend:latest
     build:
       context: ./frontend
     ports:
       - "8080:8080"
-    depends_on:
-      - backend
+    environment:
+      BACKEND_DNS: localhost
+      BACKEND_PORT: "9000"

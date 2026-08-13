@@ -47,7 +47,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          file: Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/group6-frontend:latest
 
@@ -55,7 +54,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          file: Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/group6-backend:latest
 
@@ -64,22 +62,14 @@ jobs:
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
 
-      - name: Pull newly built image
-        run: docker compose pull
-
-      - name: Run application
-        run: docker compose up -d
+      - name: Deploy to Kubernetes
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
+        run: bash scripts/deploy.sh

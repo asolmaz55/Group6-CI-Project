@@ -1,4 +1,20 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    image: ghcr.io/asolmaz55/group6-backend:latest
+    build:
+      context: ./backend
+    ports:
+      - "9000:9000"
+    environment:
+      REDIS_DNS: redis
+    depends_on:
+      - redis
+
   frontend:
     image: ghcr.io/asolmaz55/group6-frontend:latest
     build:
@@ -6,5 +22,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      BACKEND_DNS: localhost
+      BACKEND_DNS: backend
       BACKEND_PORT: "9000"
+    depends_on:
+      - backend
